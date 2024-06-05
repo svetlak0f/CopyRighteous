@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  cassandra:
+    image: cassandra:5.0
+    ports:
+      - 9042:9042
+    volumes:
+      - ./data:/var/lib/cassandra
+    environment:
+      - CASSANDRA_CLUSTER_NAME=places_db
+      - MAX_HEAP_SIZE=8G
+      - HEAP_NEWSIZE=1200M
