@@ -40,7 +40,7 @@ while True:
     
 
 
-print(len(target_embeddings))
+print(target_embeddings)
 
 
 search_filter = models.Filter(
@@ -51,19 +51,21 @@ search_filter = models.Filter(
 
 
 
-search_queries = list(map(lambda x: models.SearchRequest(vector=x.vector, filter=search_filter, limit=1), target_embeddings))
+search_queries = list(map(lambda x: models.SearchRequest(vector=x.vector, filter=search_filter,  with_payload=True, limit=1), target_embeddings))
 
 
 search_chunks = list(divide_chunks(search_queries, 64))
 
 results = list()
 
-for chunk in tqdm(search_chunks[:100]):
+for chunk in tqdm(search_chunks[:2]):
     data = client.search_batch(collection_name="embeddings", requests=chunk)
+    #flatten results
+    data = list(map(lambda x: x[0], data))
     results.extend(data)
 
 
-print(results[:1000])
+print(results[0].payload)
 
 
 
