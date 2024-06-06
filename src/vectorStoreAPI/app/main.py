@@ -8,7 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Annotated
 
 from fastapi import Depends, FastAPI
-from fastapi.security import OAuth2PasswordBearer
+
+from .routers import ingestion
 
 app = FastAPI(title="Orchestrator")
 
@@ -22,15 +23,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 app.include_router(
-    router=items_retrieving.router,
-    prefix="/items",
+    router=ingestion.router,
+    prefix="/ingestion",
     tags=["Items retrieving"]
 )
 
 
 @app.get("/")
 async def health_check():
-    return {"message": "Service are Ivan and Vlad"}
+    return {"message": "Service is alive"}

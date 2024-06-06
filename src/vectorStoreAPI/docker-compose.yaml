@@ -5,8 +5,17 @@ services:
       context: .
       dockerfile: Dockerfile
 
+  mongo:
+    image: mongo:8.0.0-rc7-jammy
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - ./data/mongodb:/data/db
+
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.9.4
     ports:
       - "6333:6333"
       - "6334:6334"
