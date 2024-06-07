@@ -2,6 +2,7 @@ from torchvision import models, transforms
 import numpy as np
 import torch
 from tqdm import tqdm
+from datetime import timedelta
 
 from abc import ABC, abstractmethod
 
@@ -24,7 +25,7 @@ class ResnetVectorizer(AbstractVideoVectorizer):
                                     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                                 ])
     
-    def __init__(self, device: str, inference_batch_size: int = 8):
+    def __init__(self, device: str, inference_batch_size: int = 16):
         self.device = torch.device(device)
         self.model = models.resnet152(pretrained=True)
         self.batch_size = inference_batch_size
@@ -40,10 +41,12 @@ class ResnetVectorizer(AbstractVideoVectorizer):
 
         return output
 
-    def process_video(self, video_path: str) -> np.ndarray:
+    def process_video(self, video_path: str) -> tuple[np.ndarray, int, timedelta, int]:
         cap = cv2.VideoCapture(video_path)
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        print(total_frames)
+        fps = int(cap.get(cv2.CAP_PROP_FPS))
+        seconds = round(total_frames / fps) 
+        video_time = timedelta(seconds=seconds) 
 
         result = np.zeros((total_frames, 1000), dtype=np.float32)
         batch_frames = []
@@ -61,4 +64,4 @@ class ResnetVectorizer(AbstractVideoVectorizer):
 
         cap.release()
 
-        return result
+        return result, total_frames, video_time, fps

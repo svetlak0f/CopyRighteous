@@ -12,3 +12,4 @@ class VideoMetadata(BaseModel):
     status: Literal["Indexing", "Indexed", "Error"]
     frames_count: Optional[int] = None
     video_time: Optional[timedelta] = None 
+    framerate: Optional[int] = None
