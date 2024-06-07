@@ -7,35 +7,31 @@ import magic
 
 from ..internal.vectorizer.main import ResnetVectorizer
 from ..internal.qdrant_handler import VectorHandler
-
+from ..internal.processing_pipeline import ProcessingPipeline
 
 blob_directory = "./data/videos/"
 
 video_vectorizer = ResnetVectorizer(device="mps")
 video_db_handler = VectorHandler()
 
+video_processor = ProcessingPipeline(video_vectorizer=video_vectorizer, 
+                                     video_db_handler=video_db_handler)
+
 router = APIRouter()
 
-@router.post("/upload_video")
+@router.post("/upload_and_index_video")
 async def upload_video(video: UploadFile = File(...)):
-    # Specify the directory where you want to save the video
-
-    # Save the video file to disk
-    save_path = blob_directory + video.filename,
+    save_path = blob_directory + video.filename
     with open(save_path, "wb") as f:
         f.write(await video.read())
 
     try:
-        result = video_vectorizer.process_video(video_path=save_path)
-    except:
-        os.remove(save_path)
+        video_processor.process_video(save_path)
+    except ValueError:
         raise HTTPException(422, "Error while processing, check media format")
-    
-    try:
-        video_db_handler.save_vectors(result.tolist(), video_id=video.filename)
-    except Exception as e:
-        os.remove(save_path)
+    except RuntimeError as e:
         raise HTTPException(500, f"Error while vector store uploading, details {e}")
+    except Exception:
+        raise HTTPException(500, "Unknown error")
 
-
-    return {"message": "Video saved successfully"}
+    return {"message": "Video saved and indexed successfully"}

@@ -8,6 +8,7 @@ from qdrant_client import models
 from uuid import UUID
 from typing import Optional
 
+from qdrant_client.http.exceptions import UnexpectedResponse
 import logging
 
 
@@ -28,7 +29,7 @@ class VectorHandler:
                 vectors_config=VectorParams(size=vector_length, distance=Distance.COSINE),
             )
             logging.info(f"{collection_name} has succesfully created")
-        except:
+        except UnexpectedResponse:
             logging.info(f"Qdrant {collection_name} collection already exists, skipping")
 
     @staticmethod
