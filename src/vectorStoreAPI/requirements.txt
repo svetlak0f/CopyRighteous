@@ -11,3 +11,5 @@ qdrant-client==1.9.1
 python-magic==0.4.27
 torchvision==0.18.1
 opencv-python==4.10.0.82
+
+tqdm==4.66.4
