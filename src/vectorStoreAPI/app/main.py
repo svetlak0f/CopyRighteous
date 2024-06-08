@@ -9,9 +9,9 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI
 
-from .routers import plagiary_search, sync_ingestion
+from .routers import plagiary_search, sync_ingestion, metadata, async_ingestion
 
-app = FastAPI(title="Orchestrator")
+app = FastAPI(title="vectorStoreAPI")
 
 origins = ["*"]
 
@@ -27,14 +27,25 @@ app.add_middleware(
 app.include_router(
     router=sync_ingestion.router,
     prefix="/sync/ingestion",
-    tags=["Items retrieving"]
+    tags=["Video uploading"]
 )
 
+app.include_router(
+    router=async_ingestion.router,
+    prefix="/async/ingestion",
+    tags=["Video uploading"]
+)
 
 app.include_router(
     router=plagiary_search.router,
     prefix="/sync/plagiary",
-    tags=["Items retrieving"]
+    tags=["Plagiary search"]
+)
+
+app.include_router(
+    router=metadata.router,
+    prefix="/metadata/video",
+    tags=["Metadata retrieving"]
 )
 
 

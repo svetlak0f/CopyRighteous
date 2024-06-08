@@ -46,3 +46,9 @@ class MetadataHandler:
 
 
 
+
+class JobMetadataHandler:
+    def __init__(self, database_path="127.0.0.1:27017/", database_name="metadata"):
+        self.client = MongoClient(f"mongodb://root:example@{database_path}", uuidRepresentation='standard')
+        self.db = self.client[database_name]
+        self.db.videos.create_index("video_id", unique=True, partialFilterExpression={"domain_name": {"$exists": True}})

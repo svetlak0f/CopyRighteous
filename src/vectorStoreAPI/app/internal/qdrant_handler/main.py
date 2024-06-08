@@ -20,7 +20,7 @@ class VectorHandler:
                  vector_length=1000,
                  collection_name="embeddings_video"):
         
-        self.client = QdrantClient(url=database_address)
+        self.client = QdrantClient(url=database_address, timeout=20)
         self.collection_name = collection_name
 
         try:
@@ -61,6 +61,22 @@ class VectorHandler:
         return results
 
         
+    def delete_vectors_by_video_id(self, video_id: str):
+        self.client.delete(
+                collection_name=self.collection_name,
+                points_selector=models.FilterSelector(
+                    filter=models.Filter(
+                        must=[
+                            models.FieldCondition(
+                                key="video_id",
+                                match=models.MatchValue(value=video_id),
+                            ),
+                        ],
+                    )
+                )
+            )
+
+
     def retrieve_vectors_by_video_id(self, video_id: str, request_batch_size: int = 256) -> list[Record]:
         target_embeddings = list()
         offset = None
