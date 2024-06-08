@@ -24,10 +24,3 @@ def search_plagiary(video_id: str) -> list[MatchingData]:
     raise HTTPException(404)
 
 
-@router.get("/search/async")
-def async_search_plagiary(video_id: str, background_tasks: BackgroundTasks):
-    search_result = metadata_handler.get_video_metadata(video_id)
-    if search_result:
-        background_tasks.add_task(video_processor.run_video_matching, video_id)
-        return "Matching job submited"
-    raise HTTPException(404)

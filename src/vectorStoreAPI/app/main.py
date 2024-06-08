@@ -9,7 +9,7 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI
 
-from .routers import plagiary_search, sync_ingestion, metadata, async_ingestion
+from .routers import plagiary_search, sync_ingestion, metadata, async_ingestion, async_plagiary_search
 
 app = FastAPI(title="vectorStoreAPI")
 
@@ -40,6 +40,12 @@ app.include_router(
     router=plagiary_search.router,
     prefix="/sync/plagiary",
     tags=["Plagiary search"]
+)
+
+app.include_router(
+    router=async_plagiary_search.router,
+    prefix="/async/plagiary",
+    tags=["Async plagiary search"]
 )
 
 app.include_router(
