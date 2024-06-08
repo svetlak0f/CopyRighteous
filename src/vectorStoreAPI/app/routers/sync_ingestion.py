@@ -9,17 +9,19 @@ from pathlib import Path
 from ..internal.vectorizer.main import ResnetVectorizer
 from ..internal.qdrant_handler import VectorHandler
 from ..internal.processing_pipeline import ProcessingPipeline
-from ..internal.metadata_handler import MetadataHandler
+from ..internal.metadata_handler import MetadataHandler, JobMetadataHandler
 
 blob_directory = "./data/videos/"
 
 video_vectorizer = ResnetVectorizer(device="mps")
 video_db_handler = VectorHandler()
 metadata_handler = MetadataHandler()
+job_metadata_handler = JobMetadataHandler()
 
 video_processor = ProcessingPipeline(video_vectorizer=video_vectorizer, 
                                      video_db_handler=video_db_handler,
-                                     metadata_handler=metadata_handler)
+                                     metadata_handler=metadata_handler,
+                                     job_metadata_handler=job_metadata_handler)
 
 router = APIRouter()
 

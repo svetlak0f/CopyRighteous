@@ -16,18 +16,6 @@ class VideoMetadata(BaseModel):
     framerate: Optional[int] = None
 
 
-class MatchingJobMetadata(BaseModel):
-    job_id: UUID
-
-    query_video_id: str
-    status: Literal["In progress", "Done", "Error"]
-    
-    started_at: datetime = Field(default_factory=datetime.now)
-    finished_at: Optional[datetime] = None
-
-
-
-
 class MatchingData(BaseModel):
     query_start_frame: int
     query_end_frame: int
@@ -42,3 +30,17 @@ class MatchingData(BaseModel):
 
     similarity_score: float
 
+class MatchingDataWithID(MatchingData):
+    job_id: UUID
+
+
+class MatchingJobData(BaseModel):
+    job_id: UUID
+
+    query_video_id: str
+    status: Literal["In progress", "Done", "Error"]
+
+    started_at: datetime = Field(default_factory=datetime.now)
+    finished_at: Optional[datetime] = None
+
+    results: Optional[list[MatchingData]] = None

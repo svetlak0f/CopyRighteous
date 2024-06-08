@@ -11,14 +11,9 @@ from ..internal.qdrant_handler import VectorHandler
 from ..internal.processing_pipeline import ProcessingPipeline
 from ..internal.metadata_handler import MetadataHandler
 
-from .sync_ingestion import video_db_handler, metadata_handler, video_vectorizer
+from .sync_ingestion import video_processor
 
 blob_directory = "./data/videos/"
-
-
-video_processor = ProcessingPipeline(video_vectorizer=video_vectorizer, 
-                                     video_db_handler=video_db_handler,
-                                     metadata_handler=metadata_handler)
 
 router = APIRouter()
 

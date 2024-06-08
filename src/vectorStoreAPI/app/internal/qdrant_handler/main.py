@@ -102,6 +102,7 @@ class VectorHandler:
             target_embeddings = list(sorted(target_embeddings, key=lambda x: x.payload["frame"]))
         return target_embeddings
         
+        
     def search_nearest_by_video_id(self, video_id: str) -> list[ScoredPoint]:
         video_embeddings = self.retrieve_vectors_by_video_id(video_id)
         bare_embeddings = list(map(lambda x: x.vector, video_embeddings))

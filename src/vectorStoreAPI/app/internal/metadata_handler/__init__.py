@@ -1,1 +1,1 @@
-from .main import MetadataHandler
+from .main import MetadataHandler, JobMetadataHandler

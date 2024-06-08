@@ -86,7 +86,7 @@ def process_matching_results(results: list[ScoredPoint], max_skip=10, min_length
                                     )
                                 )
         
-        return matching_results
+    return matching_results
 
 
 
