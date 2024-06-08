@@ -9,7 +9,7 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI
 
-from .routers import sync_ingestion
+from .routers import plagiary_search, sync_ingestion
 
 app = FastAPI(title="Orchestrator")
 
@@ -27,6 +27,13 @@ app.add_middleware(
 app.include_router(
     router=sync_ingestion.router,
     prefix="/sync/ingestion",
+    tags=["Items retrieving"]
+)
+
+
+app.include_router(
+    router=plagiary_search.router,
+    prefix="/sync/plagiary",
     tags=["Items retrieving"]
 )
 

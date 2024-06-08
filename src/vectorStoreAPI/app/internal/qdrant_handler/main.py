@@ -3,7 +3,7 @@ from qdrant_client.models import Distance, VectorParams
 from tqdm import tqdm
 import uuid
 import random
-from qdrant_client.models import PointStruct, Filter, Record
+from qdrant_client.models import PointStruct, Filter, Record, ScoredPoint
 from qdrant_client import models
 from uuid import UUID
 from typing import Optional
@@ -50,7 +50,7 @@ class VectorHandler:
             wait=True
         )
     
-    def query_vectors_batch(self, vectors: list[list[float]], chunk_size=64, search_filter: Optional[Filter] = None) -> list[dict]:
+    def query_vectors_batch(self, vectors: list[list[float]], chunk_size=16, search_filter: Optional[Filter] = None) -> list[ScoredPoint]:
         search_queries = list(map(lambda x: models.SearchRequest(vector=x, filter=search_filter, limit=1, with_payload=True), vectors))
         search_chunks = list(self.divide_chunks(search_queries, chunk_size))
         results = list()
@@ -58,9 +58,7 @@ class VectorHandler:
             data = self.client.search_batch(collection_name=self.collection_name, requests=chunk)
             data = list(map(lambda x: x[0], data))
             results.extend(data)
-    
-        payload = list(map(lambda x: x.payload), results)
-        return payload
+        return results
 
         
     def retrieve_vectors_by_video_id(self, video_id: str, request_batch_size: int = 256) -> list[Record]:
@@ -88,6 +86,20 @@ class VectorHandler:
             target_embeddings = list(sorted(target_embeddings, key=lambda x: x.payload["frame"]))
         return target_embeddings
         
+    def search_nearest_by_video_id(self, video_id: str) -> list[ScoredPoint]:
+        video_embeddings = self.retrieve_vectors_by_video_id(video_id)
+        bare_embeddings = list(map(lambda x: x.vector, video_embeddings))
+        search_filter = models.Filter(
+            must_not=[
+                models.FieldCondition(key="video_id", match=models.MatchValue(value=video_id)),
+            ]
+        )
+
+        search_result = self.query_vectors_batch(bare_embeddings, chunk_size=16, search_filter=search_filter)
+        return search_result
+
+
+
         
 
 

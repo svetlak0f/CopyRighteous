@@ -15,14 +15,14 @@ def divide_chunks(l, n):
 client = QdrantClient(url="http://localhost:6333")
 
 
-target_video = "fcc08cd5-f3d3-4675-9c70-13230498f72f"
+target_video = "c427976287995fdb66b4848d022de1ed"
 
 target_embeddings = list()
 offset = None
 
 while True:
     result, offset = client.scroll(
-                collection_name="embeddings",
+                collection_name="embeddings_video",
                 limit=256,
                 scroll_filter=models.Filter(
                     must=[
@@ -40,8 +40,6 @@ while True:
     
 
 
-print(target_embeddings)
-
 
 search_filter = models.Filter(
                     must_not=[
@@ -54,18 +52,18 @@ search_filter = models.Filter(
 search_queries = list(map(lambda x: models.SearchRequest(vector=x.vector, filter=search_filter,  with_payload=True, limit=1), target_embeddings))
 
 
-search_chunks = list(divide_chunks(search_queries, 64))
+search_chunks = list(divide_chunks(search_queries, 16))
 
 results = list()
 
-for chunk in tqdm(search_chunks[:2]):
-    data = client.search_batch(collection_name="embeddings", requests=chunk)
+for chunk in tqdm(search_chunks[:10]):
+    data = client.search_batch(collection_name="embeddings_video", requests=chunk)
     #flatten results
     data = list(map(lambda x: x[0], data))
     results.extend(data)
 
 
-print(results[0].payload)
+print(results[0])
 
 
 
