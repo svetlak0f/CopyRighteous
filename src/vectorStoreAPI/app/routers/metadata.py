@@ -13,6 +13,21 @@ def get_all_videos_metadata() -> list[VideoMetadata]:
     result = list(map(lambda x: VideoMetadata(**x), result))
     return result
 
+
+@router.get("/indexing")
+def get_indexing_videos() -> list[VideoMetadata]:
+    result = metadata_handler.get_indexing_videos()
+    result = list(map(lambda x: VideoMetadata(**x), result))
+    return result
+
+
+@router.get("/indexed")
+def get_indexed_videos() -> list[VideoMetadata]:
+    result = metadata_handler.get_indexed_videos()
+    result = list(map(lambda x: VideoMetadata(**x), result))
+    return result
+
+
 @router.get("/{video_id}")
 def get_video_metadata(video_id: str) -> VideoMetadata:
     result = metadata_handler.get_video_metadata(video_id)

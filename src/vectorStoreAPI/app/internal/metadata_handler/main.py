@@ -25,6 +25,14 @@ class MetadataHandler:
         return self.db.videos.find_one({"video_id": video_id})
     
 
+    def get_indexing_videos(self):
+        return self.db.videos.find({"status": "Indexing"})
+    
+
+    def get_indexed_videos(self):
+        return self.db.videos.find({"status": "Indexed"})
+
+
     def get_all_videos_metadata(self):
         return self.db.videos.find({})
 
