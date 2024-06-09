@@ -9,6 +9,7 @@ from uuid import UUID
 from typing import Optional
 
 from qdrant_client.http.exceptions import UnexpectedResponse
+from grpc._channel import _InactiveRpcError
 import logging
 
 
@@ -16,11 +17,11 @@ import logging
 class VectorHandler:
     
     def __init__(self, 
-                 database_address="http://localhost:6333", 
+                 database_address="http://localhost", 
                  vector_length=1000,
                  collection_name="embeddings_video"):
         
-        self.client = QdrantClient(url=database_address, timeout=20)
+        self.client = QdrantClient(url=database_address, timeout=20, grpc_port=6334, prefer_grpc=True)
         self.collection_name = collection_name
 
         try:
@@ -29,13 +30,14 @@ class VectorHandler:
                 vectors_config=VectorParams(size=vector_length, distance=Distance.COSINE),
             )
             logging.info(f"{collection_name} has succesfully created")
-        except UnexpectedResponse:
+        except (UnexpectedResponse, _InactiveRpcError):
             logging.info(f"Qdrant {collection_name} collection already exists, skipping")
 
     @staticmethod
     def divide_chunks(l, n=64): 
         for i in range(0, len(l), n):  
             yield l[i:i + n] 
+
 
     def save_vectors(self, vectors: list[list[float]], video_id: str):
         def generate_payload(video_id: str, vectors_count: int):
@@ -102,7 +104,7 @@ class VectorHandler:
             target_embeddings = list(sorted(target_embeddings, key=lambda x: x.payload["frame"]))
         return target_embeddings
         
-        
+
     def search_nearest_by_video_id(self, video_id: str) -> list[ScoredPoint]:
         video_embeddings = self.retrieve_vectors_by_video_id(video_id)
         bare_embeddings = list(map(lambda x: x.vector, video_embeddings))
