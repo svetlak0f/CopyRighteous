@@ -26,16 +26,26 @@ video_processor = ProcessingPipeline(video_vectorizer=video_vectorizer,
 router = APIRouter()
 
 @router.post("/upload_and_index_video")
-async def upload_video(video: UploadFile = File(...)):
+def upload_video(video: UploadFile = File(...), search_while_ingestion: bool = False):
     save_path = blob_directory + video.filename
+    video_id = Path(save_path).stem
+
+    search_result = metadata_handler.get_video_metadata(video_id)
+    if search_result:
+        raise HTTPException(409, "Video already exists in index, delete it before reingesting")
+
     with open(save_path, "wb") as f:
-        f.write(await video.read())
+        f.write(video.file.read())
 
     try:
-        video_processor.process_video(save_path, video_id=Path(save_path).stem)
+        video_processor.process_video(save_path, 
+                                      video_id=video_id, 
+                                      search_while_ingestion=search_while_ingestion)
     except ValueError:
         raise HTTPException(422, "Error while processing, check media format")
     except RuntimeError as e:
         raise HTTPException(500, f"Error while vector store uploading, details {e}")
+    except TypeError:
+        raise HTTPException(422, f"Plagiary found for: {video_id}")
 
     return {"message": "Video saved and indexed successfully"}

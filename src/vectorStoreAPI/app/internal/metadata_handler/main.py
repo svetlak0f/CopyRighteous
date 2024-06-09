@@ -76,4 +76,11 @@ class JobMetadataHandler:
     
 
     def get_job_metadata(self, job_id):
-        return self.db.videos.find_one({"job_id": job_id})
+        return self.db.indexing_jobs.find_one({"job_id": job_id})
+
+
+    def get_job_metadata_by_video_id(self, video_id):
+        return self.db.indexing_jobs.find({"query_video_id": video_id})
+    
+    def get_active_jobs(self):
+        return self.db.indexing_jobs.find({"status": "In progress"})

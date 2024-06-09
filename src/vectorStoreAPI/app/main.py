@@ -9,7 +9,12 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI
 
-from .routers import plagiary_search, sync_ingestion, metadata, async_ingestion, async_plagiary_search
+from .routers import (plagiary_search, 
+                      sync_ingestion, 
+                      metadata, 
+                      async_ingestion, 
+                      async_plagiary_search, 
+                      matching_jobs)
 
 app = FastAPI(title="vectorStoreAPI")
 
@@ -52,6 +57,12 @@ app.include_router(
     router=metadata.router,
     prefix="/metadata/video",
     tags=["Metadata retrieving"]
+)
+
+app.include_router(
+    router=matching_jobs.router,
+    prefix="/metadata/matching_jobs",
+    tags=["Matching jobs metadata retrieving"]
 )
 
 
