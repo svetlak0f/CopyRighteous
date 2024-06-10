@@ -24,6 +24,6 @@ export const getIndexingVideoMetadata = async () =>
 
 export const deleteVideoMetadata = async (video_id: string) =>
     await fetch(`${apiAddress}/metadata/video/${video_id}`, {
-        method: "GET"})
+        method: "DELETE"})
         .then((response) => response.json())
         .catch((reason) => console.error(reason));
