@@ -7,7 +7,7 @@ from datetime import datetime
 
 from uuid import uuid4
 from ..seqfinder import process_matching_results
-
+from ...schemas.video import MatchingData
 
 class ProcessingPipeline:
 
@@ -81,6 +81,13 @@ class ProcessingPipeline:
             self.metadata_handler.update_video_metadata(video_id=video_id, new_values=metadata)
             raise RuntimeError("Error while ingestion into database")
         
+
+    def sync_video_processing(self, video_path: str) -> list[MatchingData]:
+        result, frames_count, video_time, framerate = self.video_vectorizer.process_video(video_path=video_path)
+        matched_vectors = self.video_db_handler.query_vectors_batch(result.tolist())
+        matching_data = process_matching_results(matched_vectors)
+        return matching_data
+
 
     def run_video_matching(self, video_id):
         job_id = uuid4()

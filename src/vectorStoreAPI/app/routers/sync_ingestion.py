@@ -10,6 +10,8 @@ from ..internal.vectorizer.main import ResnetVectorizer
 from ..internal.qdrant_handler import VectorHandler
 from ..internal.processing_pipeline import ProcessingPipeline
 from ..internal.metadata_handler import MetadataHandler, JobMetadataHandler
+from ..schemas.video import MatchingData
+
 
 blob_directory = "./data/videos/"
 
@@ -26,7 +28,7 @@ video_processor = ProcessingPipeline(video_vectorizer=video_vectorizer,
 router = APIRouter()
 
 @router.post("/upload_and_index_video")
-def upload_video(video: UploadFile = File(...), search_while_ingestion: bool = False):
+def upload_video(video: UploadFile = File(), search_while_ingestion: bool = False):
     save_path = blob_directory + video.filename
     video_id = Path(save_path).stem
 
@@ -49,3 +51,19 @@ def upload_video(video: UploadFile = File(...), search_while_ingestion: bool = F
         raise HTTPException(422, f"Plagiary found for: {video_id}")
 
     return {"message": "Video saved and indexed successfully"}
+
+@router.post("/match_video_without_saving")
+def upload_video(video: UploadFile = File()) -> list[MatchingData]:
+    save_path = blob_directory + video.filename
+
+    with open(save_path, "wb") as f:
+        f.write(video.file.read())
+
+    try:
+        results = video_processor.sync_video_processing(video_path=save_path)
+    except:
+        raise HTTPException(422, "Wrong video format")
+    finally:
+        os.remove(save_path)
+
+    return results
