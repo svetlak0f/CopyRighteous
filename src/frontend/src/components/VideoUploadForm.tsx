@@ -75,7 +75,7 @@ const VideoUploadForm: React.FC = () => {
           checked={searchWhileIngestion}
           onChange={handleCheckpointChange}
         />
-        Search Similar While Ingesting
+        Произвести поиск плагиата после загрузки
       </Box>
 
       <Box mt={2}>
