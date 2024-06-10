@@ -8,6 +8,7 @@ import {FC} from 'react';
 import { UploadVideo } from 'pages/UploadVideo';
 import {BrowserRouter, Navigate, Route, Routes as RoutesComponent} from 'react-router-dom';
 import {ScrollToTop} from 'router/ScrollToTop';
+import Header from 'components/Header';
 
 
 export enum Routes {
@@ -21,6 +22,7 @@ export const Router: FC = () => {
   return (
       <BrowserRouter>
         <ScrollToTop />
+        <Header />
         <RoutesComponent>
             <Route path={Routes.Home} element={<Home />} />
             <Route path={Routes.Matching} element={<MatchingJobs />} />
