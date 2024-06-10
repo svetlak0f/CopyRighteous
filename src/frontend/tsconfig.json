@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "useDefineForClassFields": true,
+    "lib": ["es2022", "DOM", "DOM.Iterable"],
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "allowImportingTsExtensions": true,
+    "module": "NodeNext",
+    "skipLibCheck": true,
+    "moduleResolution": "nodenext",
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": "./src",
+    "composite": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": false
+  },
+  "include": ["src"],
+  "exclude": ["src/generated"]
+}
