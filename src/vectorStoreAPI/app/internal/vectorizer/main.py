@@ -37,7 +37,7 @@ class ResnetVectorizer(AbstractVideoVectorizer):
     def process_batch(self, batch):
         batch = batch.to(self.device)
         with torch.no_grad():
-            output = self.model(batch)
+            output = self.model(batch).cpu().numpy()
 
         return output
 
@@ -58,10 +58,21 @@ class ResnetVectorizer(AbstractVideoVectorizer):
             batch = torch.stack(batch_frames)
             
             if frame_num % self.batch_size == 0:
-                tn = self.process_batch(batch).cpu().numpy()
+                tn = self.process_batch(batch)
                 result[frame_num-self.batch_size:min(frame_num, total_frames+1)] = tn
                 batch_frames = []
+
+        if len(batch_frames) != 0:
+            tn = self.process_batch(batch)
+            result[frame_num-self.batch_size:min(frame_num, total_frames+1)] = tn
+            batch_frames = []
 
         cap.release()
 
         return result, total_frames, video_time, fps
+
+    
+    def process_frame(self, frame):
+        input_tensor = self.preprocess(frame).unsqueeze(0)
+        output = self.process_batch(input_tensor)
+        return output
