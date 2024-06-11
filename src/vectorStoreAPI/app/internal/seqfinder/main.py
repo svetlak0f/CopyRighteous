@@ -1,6 +1,7 @@
 import pandas as pd
 from datetime import timedelta
 from qdrant_client.models import ScoredPoint
+from typing import Optional
 
 from ...schemas.video import MatchingData
 
@@ -43,11 +44,14 @@ def calculate_mean_score(sequence):
     mean_score = sum(item['score'] for item in sequence) / len(sequence)
     return mean_score
 
-def process_matching_results(results: list[ScoredPoint], max_skip=10, min_length=100, frame_rate=10) -> list[MatchingData]:
+def process_matching_results(results: list[ScoredPoint], max_skip=10, min_length=100, frame_rate=10, input_offset: Optional[int] = None) -> list[MatchingData]:
     results = list(map(lambda x: x.model_dump(), results))
 
     df = pd.json_normalize(results)
-    df["query_video_frame"] = list(range(len(df)))
+    if input_offset:
+        df["query_video_frame"] = list(range(input_offset, input_offset + len(df)))
+    else:
+        df["query_video_frame"] = list(range(len(df)))
     # Extract necessary columns
     df['frame'] = df['payload.frame']
     df['video_id'] = df['payload.video_id']

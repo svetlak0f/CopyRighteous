@@ -11,6 +11,8 @@ from ..internal.qdrant_handler import VectorHandler
 from ..internal.processing_pipeline import ProcessingPipeline
 from ..internal.metadata_handler import MetadataHandler, JobMetadataHandler
 from ..schemas.video import MatchingData
+from ..internal.yolo_vectorizer import YoloDetector
+from ..internal.seqfinder import process_matching_results
 
 
 blob_directory = "./data/videos/"
@@ -20,10 +22,17 @@ video_db_handler = VectorHandler()
 metadata_handler = MetadataHandler()
 job_metadata_handler = JobMetadataHandler()
 
+yolo_vectorizer = YoloDetector(video_vectorizer=video_vectorizer,
+                               device="mps")
+
 video_processor = ProcessingPipeline(video_vectorizer=video_vectorizer, 
                                      video_db_handler=video_db_handler,
                                      metadata_handler=metadata_handler,
-                                     job_metadata_handler=job_metadata_handler)
+                                     job_metadata_handler=job_metadata_handler,
+                                     yolo_vectorizer=yolo_vectorizer)
+
+
+
 
 router = APIRouter()
 
@@ -53,7 +62,7 @@ def upload_video(video: UploadFile = File(), search_while_ingestion: bool = Fals
     return {"message": "Video saved and indexed successfully"}
 
 @router.post("/match_video_without_saving")
-def upload_video(video: UploadFile = File()) -> list[MatchingData]:
+def match_video(video: UploadFile = File()) -> list[MatchingData]:
     save_path = blob_directory + video.filename
 
     with open(save_path, "wb") as f:
@@ -61,6 +70,23 @@ def upload_video(video: UploadFile = File()) -> list[MatchingData]:
 
     try:
         results = video_processor.sync_video_processing(video_path=save_path)
+    except:
+        raise HTTPException(422, "Wrong video format")
+    finally:
+        os.remove(save_path)
+
+    return results
+
+
+@router.post("/match_video_without_saving_yolo")
+def match_video(video: UploadFile = File()) -> list[MatchingData]:
+    save_path = blob_directory + video.filename
+
+    with open(save_path, "wb") as f:
+        f.write(video.file.read())
+
+    try:
+        results = video_processor.sync_process_with_yolo(video_path=save_path)
     except:
         raise HTTPException(422, "Wrong video format")
     finally:

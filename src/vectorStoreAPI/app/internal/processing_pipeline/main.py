@@ -1,5 +1,6 @@
 from ..qdrant_handler import VectorHandler
 from ..vectorizer import ResnetVectorizer, AbstractVideoVectorizer
+from ...internal.yolo_vectorizer import YoloDetector
 from ..metadata_handler import MetadataHandler, JobMetadataHandler
 import os
 from pathlib import Path
@@ -15,12 +16,14 @@ class ProcessingPipeline:
                  video_vectorizer: AbstractVideoVectorizer, 
                  video_db_handler: VectorHandler,
                  metadata_handler: MetadataHandler,
-                 job_metadata_handler: JobMetadataHandler):
+                 job_metadata_handler: JobMetadataHandler,
+                 yolo_vectorizer: YoloDetector):
         
         self.video_vectorizer = video_vectorizer
         self.video_db_handler = video_db_handler
         self.metadata_handler = metadata_handler
         self.job_metadata_handler = job_metadata_handler
+        self.yolo_vectorizer = yolo_vectorizer
 
     def process_video(self, video_path, video_id, search_while_ingestion: bool = False):
         try:
@@ -88,6 +91,19 @@ class ProcessingPipeline:
         matching_data = process_matching_results(matched_vectors)
         return matching_data
 
+
+    def sync_process_with_yolo(self, video_path: str):
+        yolo_matches = self.yolo_vectorizer.process_video_frames(video_path=video_path)
+        matching_data = list()
+        for yolo_match in yolo_matches:
+            results = self.video_db_handler.query_vectors_batch(yolo_match.vectors)
+            print(len(yolo_match.vectors))
+            print(yolo_match.length)
+            matching = process_matching_results(results=results, max_skip=100, min_length=5, input_offset=yolo_match.start)
+            print(matching)
+            matching_data.extend(matching)
+        
+        return matching_data
 
     def run_video_matching(self, video_id):
         job_id = uuid4()

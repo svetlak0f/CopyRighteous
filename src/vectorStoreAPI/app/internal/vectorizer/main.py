@@ -15,6 +15,11 @@ class AbstractVideoVectorizer(ABC):
     def process_video(self, video_path: str) -> np.ndarray:
         pass
 
+    @abstractmethod
+    def process_frame(self, frame) -> np.ndarray:
+        pass
+    
+
 
 class ResnetVectorizer(AbstractVideoVectorizer):
 
@@ -62,10 +67,10 @@ class ResnetVectorizer(AbstractVideoVectorizer):
                 result[frame_num-self.batch_size:min(frame_num, total_frames+1)] = tn
                 batch_frames = []
 
-        if len(batch_frames) != 0:
-            tn = self.process_batch(batch)
-            result[frame_num-self.batch_size:min(frame_num, total_frames+1)] = tn
-            batch_frames = []
+        # if len(batch_frames) != 0:
+        #     tn = self.process_batch(batch)
+        #     result[frame_num-self.batch_size:min(frame_num, total_frames+1)] = tn
+        #     batch_frames = []
 
         cap.release()
 
