@@ -9,6 +9,7 @@ from datetime import datetime
 from uuid import uuid4
 from ..seqfinder import process_matching_results
 from ...schemas.video import MatchingData
+from qdrant_client.models import ScoredPoint
 
 class ProcessingPipeline:
 
@@ -92,7 +93,13 @@ class ProcessingPipeline:
         return matching_data
 
 
-    def sync_process_with_yolo(self, video_path: str):
+    def sync_video_processing_raw(self, video_path: str) -> list[ScoredPoint]:
+        result, frames_count, video_time, framerate = self.video_vectorizer.process_video(video_path=video_path)
+        matched_vectors = self.video_db_handler.query_vectors_batch(result.tolist())
+        return matched_vectors
+    
+
+    def sync_process_with_yolo(self, video_path: str) -> list[MatchingData]:
         yolo_matches = self.yolo_vectorizer.process_video_frames(video_path=video_path)
         matching_data = list()
         for yolo_match in yolo_matches:
@@ -101,6 +108,16 @@ class ProcessingPipeline:
             matching_data.extend(matching)
         
         return matching_data
+    
+
+    def sync_process_with_yolo_raw(self, video_path: str)  -> list[ScoredPoint]:
+        yolo_matches = self.yolo_vectorizer.process_video_frames(video_path=video_path)
+        matching_data = list()
+        for yolo_match in yolo_matches:
+            results = self.video_db_handler.query_vectors_batch(yolo_match.vectors)
+            matching_data.extend(results)
+        
+        return results
 
     def run_video_matching(self, video_id):
         job_id = uuid4()

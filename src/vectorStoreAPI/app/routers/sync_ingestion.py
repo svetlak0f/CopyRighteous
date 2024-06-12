@@ -14,6 +14,7 @@ from ..internal.metadata_handler import MetadataHandler, JobMetadataHandler
 from ..schemas.video import MatchingData, SpecifiedMatching
 from ..internal.yolo_vectorizer import YoloDetector
 from ..internal.seqfinder import process_matching_results
+from qdrant_client.models import ScoredPoint
 
 
 blob_directory = "./data/videos/"
@@ -69,13 +70,13 @@ def match_video(video: UploadFile = File()) -> SpecifiedMatching:
     with open(save_path, "wb") as f:
         f.write(video.file.read())
 
-    try:
-        results = video_processor.sync_video_processing(video_path=save_path)
-        results_yolo = video_processor.sync_process_with_yolo(video_path=save_path)
-    except:
-        raise HTTPException(422, "Wrong video format")
-    finally:
-        os.remove(save_path)
+    # try:
+    results = video_processor.sync_video_processing(video_path=save_path)
+    results_yolo = video_processor.sync_process_with_yolo(video_path=save_path)
+    # except:
+    #     raise HTTPException(422, "Wrong video format")
+    # finally:
+    #     os.remove(save_path)
 
     response = SpecifiedMatching(classical_search=results,
                                  yolo_matching=results_yolo)
@@ -96,5 +97,22 @@ def match_video(video: UploadFile = File()) -> list[MatchingData]:
     #     raise HTTPException(422, "Wrong video format")
     # finally:
     #     os.remove(save_path)
+
+    return results
+
+
+@router.post("/match_video_without_saving_raw")
+def raw_vectors(video: UploadFile = File()) -> list[ScoredPoint]:
+    save_path = blob_directory + video.filename
+
+    with open(save_path, "wb") as f:
+        f.write(video.file.read())
+
+    try:
+        results = video_processor.sync_video_processing_raw(video_path=save_path)
+    except:
+        raise HTTPException(422, "Wrong video format")
+    finally:
+        os.remove(save_path)
 
     return results
