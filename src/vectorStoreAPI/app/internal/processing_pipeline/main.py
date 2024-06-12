@@ -26,22 +26,22 @@ class ProcessingPipeline:
         self.yolo_vectorizer = yolo_vectorizer
 
     def process_video(self, video_path, video_id, search_while_ingestion: bool = False):
-        try:
-            self.metadata_handler.add_new_video_metadata(video_id)
-            result, frames_count, video_time, framerate = self.video_vectorizer.process_video(video_path=video_path)
-            metadata = {
-                "frames_count": frames_count,
-                "video_time": str(video_time),
-                "framerate": framerate
-            }
-            self.metadata_handler.update_video_metadata(video_id=video_id, new_values=metadata)
-        except:
-            os.remove(video_path)
-            metadata = {
-                "status": "Error",
-            }
-            self.metadata_handler.update_video_metadata(video_id=video_id, new_values=metadata)
-            raise ValueError("Error while processing, check media format")
+        # try:
+        self.metadata_handler.add_new_video_metadata(video_id)
+        result, frames_count, video_time, framerate = self.video_vectorizer.process_video(video_path=video_path)
+        metadata = {
+            "frames_count": frames_count,
+            "video_time": str(video_time),
+            "framerate": framerate
+        }
+        self.metadata_handler.update_video_metadata(video_id=video_id, new_values=metadata)
+        # except:
+        #     os.remove(video_path)
+        #     metadata = {
+        #         "status": "Error",
+        #     }
+        #     self.metadata_handler.update_video_metadata(video_id=video_id, new_values=metadata)
+        #     raise ValueError("Error while processing, check media format")
         
         if search_while_ingestion:
             job_id = uuid4()
@@ -88,7 +88,7 @@ class ProcessingPipeline:
     def sync_video_processing(self, video_path: str) -> list[MatchingData]:
         result, frames_count, video_time, framerate = self.video_vectorizer.process_video(video_path=video_path)
         matched_vectors = self.video_db_handler.query_vectors_batch(result.tolist())
-        matching_data = process_matching_results(matched_vectors)
+        matching_data = process_matching_results(matched_vectors, max_skip=10, min_length=70)
         return matching_data
 
 
@@ -97,10 +97,7 @@ class ProcessingPipeline:
         matching_data = list()
         for yolo_match in yolo_matches:
             results = self.video_db_handler.query_vectors_batch(yolo_match.vectors)
-            print(len(yolo_match.vectors))
-            print(yolo_match.length)
-            matching = process_matching_results(results=results, max_skip=100, min_length=5, input_offset=yolo_match.start)
-            print(matching)
+            matching = process_matching_results(results=results, max_skip=10, min_length=70, input_offset=yolo_match.start)
             matching_data.extend(matching)
         
         return matching_data

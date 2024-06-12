@@ -58,7 +58,7 @@ class YoloDetector:
                         detections[-1].length += 1
                     else:
                         detections.append(Segment(frame_num - self.batch_size + idx + 1, 0,
-                                                  np.zeros((1, 1000), dtype=np.float32)))
+                                                  np.zeros((1, 512), dtype=np.float32)))
                         detections[-1].vectors[0] = vector
                         write_segment = True
 

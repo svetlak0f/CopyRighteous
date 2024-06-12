@@ -30,6 +30,12 @@ class MatchingData(BaseModel):
 
     similarity_score: float
 
+
+class SpecifiedMatching(BaseModel):
+    classical_search: list[MatchingData]
+    yolo_matching: list[MatchingData]
+
+
 class MatchingDataWithID(MatchingData):
     job_id: UUID
 

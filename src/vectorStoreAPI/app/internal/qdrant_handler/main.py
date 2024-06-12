@@ -18,7 +18,7 @@ class VectorHandler:
     
     def __init__(self, 
                  database_address="http://localhost", 
-                 vector_length=1000,
+                 vector_length=512,
                  collection_name="embeddings_video"):
         
         self.client = QdrantClient(url=database_address, timeout=20, grpc_port=6334, prefer_grpc=True)
