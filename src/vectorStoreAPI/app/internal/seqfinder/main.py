@@ -70,7 +70,7 @@ def process_matching_results(results: list[ScoredPoint], max_skip=10, min_length
         query_end_time = frame_to_time(query_end_frame, frame_rate)
 
         match_start_frame = seq[0]['frame']
-        match_end_frame = seq[-1]['frame']
+        match_end_frame = match_start_frame + len(seq)
         match_start_time = frame_to_time(match_start_frame, frame_rate)
         match_end_time = frame_to_time(match_end_frame, frame_rate)
 
