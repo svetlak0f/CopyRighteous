@@ -19,7 +19,8 @@ from qdrant_client.models import ScoredPoint
 
 blob_directory = "./data/videos/"
 
-video_vectorizer = ClipVectorizer(device="mps")
+# video_vectorizer = ClipVectorizer(device="mps")
+video_vectorizer = ResnetVectorizer(device="mps")
 video_db_handler = VectorHandler()
 metadata_handler = MetadataHandler()
 job_metadata_handler = JobMetadataHandler()

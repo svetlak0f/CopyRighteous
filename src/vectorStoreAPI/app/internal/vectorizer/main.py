@@ -58,6 +58,8 @@ class ResnetVectorizer(AbstractVideoVectorizer):
 
         for frame_num in tqdm(range(1, total_frames+1), desc='Processing video'):
             ret, frame = cap.read()
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR) 
             input_tensor = self.preprocess(frame)
             batch_frames.append(input_tensor)
             batch = torch.stack(batch_frames)
@@ -78,6 +80,8 @@ class ResnetVectorizer(AbstractVideoVectorizer):
 
     
     def process_frame(self, frame):
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR) 
         input_tensor = self.preprocess(frame).unsqueeze(0)
         output = self.process_batch(input_tensor)
         return output

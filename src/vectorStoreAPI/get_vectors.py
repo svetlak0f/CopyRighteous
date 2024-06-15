@@ -28,7 +28,7 @@ def main():
     video_files = [f for f in os.listdir(directory_path) if f.endswith('.mp4')]
     
     # Use ThreadPoolExecutor to parallelize the upload tasks
-    with ThreadPoolExecutor(max_workers=4) as executor:
+    with ThreadPoolExecutor(max_workers=1) as executor:
         # Submit tasks to the executor
         futures = {executor.submit(upload_video, os.path.join(directory_path, filename), filename): filename for filename in video_files}
         
