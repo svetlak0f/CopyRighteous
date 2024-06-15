@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Dialog from '@mui/material/Dialog';
@@ -80,7 +81,13 @@ const VideoDataGrid: React.FC = () => {
   const renderStatusIcon = (params: GridRenderCellParams) => {
     const status = params.row.status as string;
     if (status === 'Indexed') {
-      return <CheckCircleIcon style={{ color: 'green' }} />;
+      return <CheckCircleIcon style={{ marginTop: '15px', color: 'green' }} />;
+    }
+    if (status === 'Indexing'){
+      return <CircularProgress size={20} style={{ marginRight: '10px' }} />
+    }
+    if (status === 'Plagiary found'){
+      return <ErrorIcon style={{ marginTop: '15px', color:"red" }} />
     }
     return null;
   };

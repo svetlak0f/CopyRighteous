@@ -42,7 +42,10 @@ def delete_video(video_id: str):
     if result:
         video_db_handler.delete_vectors_by_video_id(video_id)
         metadata_handler.delete_video_metadata(video_id)
-        os.remove(os.path.join(blob_directory, f"{video_id}.mp4"))
+        try:
+            os.remove(os.path.join(blob_directory, f"{video_id}.mp4"))
+        except:
+            pass
         return "ok"
     raise HTTPException(404)
     

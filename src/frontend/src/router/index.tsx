@@ -9,6 +9,7 @@ import { UploadVideo } from 'pages/UploadVideo';
 import {BrowserRouter, Navigate, Route, Routes as RoutesComponent} from 'react-router-dom';
 import {ScrollToTop} from 'router/ScrollToTop';
 import Header from 'components/Header';
+import { MatchingResults } from 'pages/MatchingResults';
 
 
 export enum Routes {
@@ -16,6 +17,7 @@ export enum Routes {
   Videos = '/videos',
   Matching = '/matching',
   UploadVideo = '/upload',
+  MatchingResults='/matching_results'
 }
 
 export const Router: FC = () => {
@@ -28,6 +30,7 @@ export const Router: FC = () => {
             <Route path={Routes.Matching} element={<MatchingJobs />} />
             <Route path={Routes.Videos} element={<Videos />} />
             <Route path={Routes.UploadVideo} element={<UploadVideo />} />
+            <Route path={Routes.MatchingResults} element={<MatchingResults />} />
           <Route path="*" element={<Navigate to={Routes.Home} replace />} />
         </RoutesComponent>
       </BrowserRouter>

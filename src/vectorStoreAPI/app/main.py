@@ -1,6 +1,7 @@
 from fastapi import Depends, FastAPI
 # from .schemas import db_models as models
 from dotenv import load_dotenv
+from fastapi.staticfiles import StaticFiles
 
 load_dotenv()
 
@@ -17,6 +18,8 @@ from .routers import (plagiary_search,
                       matching_jobs)
 
 app = FastAPI(title="vectorStoreAPI")
+
+app.mount('/media/videos', StaticFiles(directory='./data/videos'), 'files')
 
 origins = ["*"]
 

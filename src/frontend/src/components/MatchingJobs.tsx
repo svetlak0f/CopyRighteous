@@ -6,6 +6,8 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
+import ErrorIcon from '@mui/icons-material/Error';
+import InfoIcon from '@mui/icons-material/Info';
 
 import { deleteVideoMetadata } from 'api/video_metadata';
 import { getAllMatchingJobs } from 'api/jobs';
@@ -58,41 +60,34 @@ const JobsDataGrid: React.FC = () => {
     fetchData();
   }, []);
 
-  const handleDelete = async (videoId: string) => {
-    const confirmed = window.confirm(`Are you sure you want to delete ${videoId}?`);
-    if (confirmed) {
-      setIsLoading(true);
-      setDeleteVideoId(videoId);
-      setIsDeleteConfirmationOpen(true);
-      try {
-        // Perform delete operation
-        const result = await deleteVideoMetadata(videoId);
-        fetchData();
-      } catch (error) {
-        console.error('Error deleting video metadata:', error);
-      } finally {
-        setIsLoading(false);
-        setIsDeleteConfirmationOpen(false);
-      }
+  const renderDeleteButton = (params: GridRenderCellParams) => {
+    const results = params.row.results as JobResults[];
+    if (results && results.length > 0){
+      return (
+        <Button
+          variant="contained"
+          color="secondary"
+          startIcon={<InfoIcon />}
+          onClick={() => {}}
+          disabled={isLoading}
+        >
+          Детали
+        </Button>
+      )
     }
-  };
-
-  const renderDeleteButton = (params: GridRenderCellParams) => (
-    <Button
-      variant="contained"
-      color="secondary"
-      startIcon={<DeleteIcon />}
-      onClick={() => handleDelete(params.row.video_id as string)}
-      disabled={isLoading}
-    >
-      Delete
-    </Button>
-  );
+};
 
   const renderStatusIcon = (params: GridRenderCellParams) => {
     const status = params.row.status as string;
+    const results = params.row.results as JobResults[];
+    if (results && results.length > 0) {
+      return <ErrorIcon style={{marginTop: '15px', color: 'red' }} />;
+    }
     if (status === 'Done') {
-      return <CheckCircleIcon style={{ color: 'green' }} />;
+      return <CheckCircleIcon style={{marginTop: '15px', color: 'green' }} />;
+    }
+    if (status === 'In progress'){
+      return <CircularProgress size={20} style={{ marginRight: '10px' }} />
     }
     return null;
   };
@@ -109,12 +104,12 @@ const JobsDataGrid: React.FC = () => {
       width: 60,
       renderCell: renderStatusIcon,
     },
-    // {
-    //   field: 'delete',
-    //   headerName: 'Удалить',
-    //   width: 140,
-    //   renderCell: renderDeleteButton,
-    // },
+    {
+      field: 'details',
+      headerName: 'Детали',
+      width: 140,
+      renderCell: renderDeleteButton,
+    },
   ];
 
 

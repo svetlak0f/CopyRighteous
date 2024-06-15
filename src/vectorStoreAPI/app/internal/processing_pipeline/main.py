@@ -11,6 +11,9 @@ from ..seqfinder import process_matching_results
 from ...schemas.video import MatchingData
 from qdrant_client.models import ScoredPoint
 
+
+blob_address = "./data/videos"
+
 class ProcessingPipeline:
 
     def __init__(self, 
@@ -50,8 +53,10 @@ class ProcessingPipeline:
                                             video_id=video_id)
             
             matched_vectors = self.video_db_handler.query_vectors_batch(result.tolist())
-
             matching_data = process_matching_results(matched_vectors)
+            yolo_matching_data = self.sync_process_with_yolo(video_path)
+
+            matching_data.extend(yolo_matching_data)
 
             data = {
                 "status": "Done",
@@ -63,7 +68,6 @@ class ProcessingPipeline:
                                                         new_values=data)   
             
             if matching_data:
-                os.remove(video_path)
                 metadata = {
                     "status": "Plagiary found",
                 }
@@ -126,6 +130,10 @@ class ProcessingPipeline:
                                                     video_id=video_id)
         vector_search_results = self.video_db_handler.search_nearest_by_video_id(video_id)
         matching_data = process_matching_results(vector_search_results)
+
+        yolo_matching_data = self.sync_process_with_yolo(video_id)
+
+        matching_data.extend(yolo_matching_data)
 
         data = {
             "status": "Done",
