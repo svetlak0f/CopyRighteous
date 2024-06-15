@@ -8,6 +8,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import ErrorIcon from '@mui/icons-material/Error';
 import InfoIcon from '@mui/icons-material/Info';
+import { Link } from 'react-router-dom';
 
 import { deleteVideoMetadata } from 'api/video_metadata';
 import { getAllMatchingJobs } from 'api/jobs';
@@ -68,7 +69,8 @@ const JobsDataGrid: React.FC = () => {
           variant="contained"
           color="secondary"
           startIcon={<InfoIcon />}
-          onClick={() => {}}
+          component={Link}
+          to={`/matching_results?job_id=${params.row.job_id}`}
           disabled={isLoading}
         >
           Детали

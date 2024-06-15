@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Grid } from '@mui/material';
 import { getSpecificMatchingJobByJobID } from 'api/jobs';
-import ReactPlayer from 'react-player'
-
-interface VideoComparisonProps {
-  queryVideoId: string;
-  matchVideoId: string;
-}
+import { useSearchParams } from "react-router-dom";
+import ReactPlayer from 'react-player';
 
 interface VideoData {
   startFrame: number;
@@ -16,55 +12,74 @@ interface VideoData {
   videoUrl: string;
 }
 
-interface JobResults{
-    query_start_frame: number;
-    query_end_frame: number;
-    query_start_time: string;
-    query_end_time: string;
-    match_video_id: string;
-    match_start_frame: number;
-    match_end_frame: number;
-    match_start_time: string;
-    match_end_time: string;
-    similarity_score: number
+interface JobResults {
+  query_start_frame: number;
+  query_end_frame: number;
+  query_start_time: string;
+  query_end_time: string;
+  match_video_id: string;
+  match_start_frame: number;
+  match_end_frame: number;
+  match_start_time: string;
+  match_end_time: string;
+  similarity_score: number;
 }
 
 interface JobData {
-    job_id: string;
-    query_video_id: string;
-    status: string;
-    started_at: string;
-    finished_at: number;
-    results: JobResults[]
+  job_id: string;
+  query_video_id: string;
+  status: string;
+  started_at: string;
+  finished_at: number;
+  results: JobResults[];
 }
 
-const job_id = "87752e3b-ca05-461d-9cbc-602328e2d553"
+interface VideoPlayerProps {
+  videoData: VideoData;
+}
 
-const VideoComparison: React.FC = ({ }) => {
-  const [queryVideoData, setQueryVideoData] = useState<VideoData | null>(null);
-  const [matchVideoData, setMatchVideoData] = useState<VideoData | null>(null);
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoData }) => {
+  return (
+    <>
+      <ReactPlayer
+        controls
+        url={`http://127.0.0.1:8000/media/videos/${videoData.videoUrl}`}
+      />
+      <Typography>{`Время начала: ${videoData.startTime}`}</Typography>
+      <Typography>{`Время конца: ${videoData.endTime}`}</Typography>
+    </>
+  );
+};
+
+const VideoComparison: React.FC = () => {
+  const [videoData, setVideoData] = useState<{ query: VideoData[], match: VideoData[] }>({ query: [], match: [] });
+  const [searchParams] = useSearchParams();
+
+  const job_id = String(searchParams.get("job_id") as string);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const search_job_metadata = await getSpecificMatchingJobByJobID(job_id)
-        console.log(search_job_metadata)
+        const search_job_metadata = await getSpecificMatchingJobByJobID(job_id);
+        console.log(search_job_metadata);
 
-        setQueryVideoData({
-          startFrame: search_job_metadata.results[0].query_start_frame,
-          endFrame: search_job_metadata.results[0].query_end_frame,
-          startTime: search_job_metadata.results[0].query_start_time,
-          endTime: search_job_metadata.results[0].query_end_time,
-          videoUrl: `${search_job_metadata.results[0].query_video_id}.mp4`,
-        });
+        const queryData: VideoData[] = search_job_metadata.results.map((result: JobResults) => ({
+          startFrame: result.query_start_frame,
+          endFrame: result.query_end_frame,
+          startTime: result.query_start_time,
+          endTime: result.query_end_time,
+          videoUrl: `${search_job_metadata.query_video_id}.mp4`,
+        }));
 
-        setMatchVideoData({
-          startFrame: search_job_metadata.results[0].match_start_frame,
-          endFrame: search_job_metadata.results[0].match_end_frame,
-          startTime: search_job_metadata.results[0].match_start_time,
-          endTime: search_job_metadata.results[0].match_end_time,
-          videoUrl: `${search_job_metadata.results[0].match_video_id}.mp4`,
-        });
+        const matchData: VideoData[] = search_job_metadata.results.map((result: JobResults) => ({
+          startFrame: result.match_start_frame,
+          endFrame: result.match_end_frame,
+          startTime: result.match_start_time,
+          endTime: result.match_end_time,
+          videoUrl: `${result.match_video_id}.mp4`,
+        }));
+
+        setVideoData({ query: queryData, match: matchData });
       } catch (error) {
         console.error('Error fetching video data:', error);
       }
@@ -73,28 +88,21 @@ const VideoComparison: React.FC = ({ }) => {
     fetchData();
   }, []);
 
-  const calculateSeekTime = (startTime: string, startFrame: number) => {
-    const seconds = startFrame / 10; // Assuming 10 frames per second
-    const startTimeInSeconds = parseInt(startTime.split(':')[2]);
-    return startTimeInSeconds + seconds;
-  };
-
   return (
     <Box>
-      {queryVideoData && matchVideoData ? (
-        <>
-          <Typography variant="h5">Видео из запроса</Typography>
-          <ReactPlayer controls url={`http://127.0.0.1:8000/media/videos/${queryVideoData.videoUrl}`}
-            seek={calculateSeekTime(queryVideoData.startTime, queryVideoData.startFrame)} />
-          <Typography>{`Время начала: ${queryVideoData.startTime}`}</Typography>
-          <Typography>{`Время конца: ${queryVideoData.endTime}`}</Typography>
-
-          <Typography variant="h5">Найденное видео</Typography>
-          <ReactPlayer controls url={`http://127.0.0.1:8000/media/videos/${matchVideoData.videoUrl}`} 
-                    seek={calculateSeekTime(matchVideoData.startTime, matchVideoData.startFrame)}/>
-          <Typography>{`Время начала: ${matchVideoData.startTime}`}</Typography>
-          <Typography>{`Время конца: ${matchVideoData.endTime}`}</Typography>
-        </>
+      {videoData.query.length && videoData.match.length ? (
+        videoData.query.map((queryVideo, index) => (
+          <Grid container spacing={2} key={index} alignItems="flex-start">
+            <Grid item xs={6}>
+              <Typography variant="h5">Видео из запроса</Typography>
+              <VideoPlayer videoData={queryVideo} />
+            </Grid>
+            <Grid item xs={6}>
+              <Typography variant="h5">Найденное видео</Typography>
+              <VideoPlayer videoData={videoData.match[index]} />
+            </Grid>
+          </Grid>
+        ))
       ) : (
         <Typography>Загрузка...</Typography>
       )}

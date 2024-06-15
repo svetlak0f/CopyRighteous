@@ -15,11 +15,11 @@ from .routers import (plagiary_search,
                       metadata, 
                       async_ingestion, 
                       async_plagiary_search, 
-                      matching_jobs)
+                      matching_jobs, media)
 
 app = FastAPI(title="vectorStoreAPI")
 
-app.mount('/media/videos', StaticFiles(directory='./data/videos'), 'files')
+# app.mount('/media/videos', StaticFiles(directory='./data/videos'), 'files')
 
 origins = ["*"]
 
@@ -47,6 +47,12 @@ app.include_router(
 app.include_router(
     router=plagiary_search.router,
     prefix="/sync/plagiary",
+    tags=["Plagiary search"]
+)
+
+app.include_router(
+    router=media.router,
+    prefix="/media",
     tags=["Plagiary search"]
 )
 
