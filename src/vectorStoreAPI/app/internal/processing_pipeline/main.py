@@ -93,7 +93,7 @@ class ProcessingPipeline:
     def sync_video_processing(self, video_path: str) -> list[MatchingData]:
         result, frames_count, video_time, framerate = self.video_vectorizer.process_video(video_path=video_path)
         matched_vectors = self.video_db_handler.query_vectors_batch(result.tolist())
-        matching_data = process_matching_results(matched_vectors, max_skip=10, min_length=70)
+        matching_data = process_matching_results(matched_vectors, min_length=90)
         return matching_data
 
 
@@ -108,7 +108,8 @@ class ProcessingPipeline:
         matching_data = list()
         for yolo_match in yolo_matches:
             results = self.video_db_handler.query_vectors_batch(yolo_match.vectors)
-            matching = process_matching_results(results=results, max_skip=10, min_length=70, input_offset=yolo_match.start)
+            print(len(results))
+            matching = process_matching_results(results=results, min_length=90, input_offset=yolo_match.start)
             matching_data.extend(matching)
         
         return matching_data

@@ -29,6 +29,7 @@ class MatchingData(BaseModel):
     match_end_time: str
 
     similarity_score: float
+    sound_similarity_score: Optional[float] = None
 
 
 class SpecifiedMatching(BaseModel):

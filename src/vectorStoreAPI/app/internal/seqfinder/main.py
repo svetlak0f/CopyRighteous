@@ -44,7 +44,7 @@ def calculate_mean_score(sequence):
     mean_score = sum(item['score'] for item in sequence) / len(sequence)
     return mean_score
 
-def process_matching_results(results: list[ScoredPoint], max_skip=10, min_length=100, frame_rate=10, input_offset: Optional[int] = None) -> list[MatchingData]:
+def process_matching_results(results: list[ScoredPoint], max_skip=12, min_length=100, frame_rate=10, input_offset: Optional[int] = None) -> list[MatchingData]:
     results = list(map(lambda x: x.model_dump(), results))
 
     df = pd.json_normalize(results)
@@ -70,7 +70,7 @@ def process_matching_results(results: list[ScoredPoint], max_skip=10, min_length
         query_end_time = frame_to_time(query_end_frame, frame_rate)
 
         match_start_frame = seq[0]['frame']
-        match_end_frame = match_start_frame + len(seq)
+        match_end_frame = match_start_frame + (query_end_frame - query_start_frame)
         match_start_time = frame_to_time(match_start_frame, frame_rate)
         match_end_time = frame_to_time(match_end_frame, frame_rate)
 

@@ -10,6 +10,7 @@ interface VideoData {
   startTime: string;
   endTime: string;
   videoUrl: string;
+  confidence_score: number;
 }
 
 interface JobResults {
@@ -54,6 +55,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoData }) => {
 const VideoComparison: React.FC = () => {
   const [videoData, setVideoData] = useState<{ query: VideoData[], match: VideoData[] }>({ query: [], match: [] });
   const [searchParams] = useSearchParams();
+  const [searchVideoID, setSearchVideoID] = useState<string>("")
 
   const job_id = String(searchParams.get("job_id") as string);
 
@@ -69,6 +71,7 @@ const VideoComparison: React.FC = () => {
           startTime: result.query_start_time,
           endTime: result.query_end_time,
           videoUrl: `${search_job_metadata.query_video_id}.mp4`,
+          confidence_score: result.similarity_score
         }));
 
         const matchData: VideoData[] = search_job_metadata.results.map((result: JobResults) => ({
@@ -76,10 +79,11 @@ const VideoComparison: React.FC = () => {
           endFrame: result.match_end_frame,
           startTime: result.match_start_time,
           endTime: result.match_end_time,
-          videoUrl: `${result.match_video_id}.mp4`,
+          videoUrl: `${result.match_video_id}.mp4`
         }));
 
         setVideoData({ query: queryData, match: matchData });
+        setSearchVideoID(search_job_metadata.query_video_id)
       } catch (error) {
         console.error('Error fetching video data:', error);
       }
@@ -90,6 +94,7 @@ const VideoComparison: React.FC = () => {
 
   return (
     <Box>
+      <Typography variant="h4">Мэтчинг для видео {searchVideoID}</Typography>
       {videoData.query.length && videoData.match.length ? (
         videoData.query.map((queryVideo, index) => (
           <Grid container spacing={2} key={index} alignItems="flex-start">
@@ -98,8 +103,9 @@ const VideoComparison: React.FC = () => {
               <VideoPlayer videoData={queryVideo} />
             </Grid>
             <Grid item xs={6}>
-              <Typography variant="h5">Найденное видео</Typography>
+              <Typography variant="h5">Найденное видео: {queryVideo.videoUrl}</Typography>
               <VideoPlayer videoData={videoData.match[index]} />
+              <Typography variant="h6">Скор похожести {queryVideo.confidence_score}</Typography>
             </Grid>
           </Grid>
         ))
