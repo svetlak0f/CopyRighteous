@@ -10,6 +10,9 @@ router = APIRouter()
 
 @router.get("/videos/{video_id}")
 def get_video(video_id: str):
+    """
+    Получение оригинального видео
+    """
     # Read the MP4 video file
     path = os.path.join(blob_path, video_id)
     with open(path, "rb") as video_file:

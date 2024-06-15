@@ -19,6 +19,11 @@ router = APIRouter()
 
 @router.post("/upload_and_index_video")
 async def upload_video(background_tasks: BackgroundTasks, video: UploadFile = File(), search_while_ingestion: bool = False):
+    """
+    Асинхронный эндпоинт загрузки видео и индексации видео
+    флаг ```search_while_ingestion``` отвечает за поиск внутри базы перед загрузкой видео.
+    В случае нахождения плагиата, видео не загружается в базу
+    """
     save_path = blob_directory + video.filename
     video_id = Path(save_path).stem
     search_result = metadata_handler.get_video_metadata(video_id)

@@ -1,9 +1,20 @@
 services:
 
-  # vectorStoreAPI:
-  #     build:
-  #     context: .
-  #     dockerfile: Dockerfile
+  vectorStoreAPI:
+    build:
+    context: .
+    dockerfile: Dockerfile
+    environment:
+      DEVICE: cpu
+    volumes:
+      - ./data/videos:/data/videos
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
   mongo:
     image: mongo:8.0.0-rc7-jammy

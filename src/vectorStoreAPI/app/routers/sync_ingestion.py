@@ -43,6 +43,11 @@ router = APIRouter()
 
 @router.post("/upload_and_index_video")
 def upload_video(video: UploadFile = File(), search_while_ingestion: bool = False):
+    """
+    Эндпоинт предназначен для синхронной загрузки видео, вовзращает 200 в случае успешной загрузки и индексации
+    флаг ```search_while_ingestion``` отвечает за поиск внутри базы перед загрузкой видео.
+    В случае нахождения плагиата, видео не загружается в базу
+    """
     save_path = blob_directory + video.filename
     video_id = Path(save_path).stem
 
@@ -68,6 +73,9 @@ def upload_video(video: UploadFile = File(), search_while_ingestion: bool = Fals
 
 @router.post("/match_video_without_saving")
 def match_video(video: UploadFile = File()) -> list[MatchingData]:
+    """
+    Синхронный эндпоинт для проверки видео на плагиат без его загрузки в базу
+    """
     save_path = blob_directory + video.filename
 
     with open(save_path, "wb") as f:
@@ -112,6 +120,9 @@ def match_video(video: UploadFile = File()) -> list[MatchingData]:
 
 @router.post("/match_video_without_saving_yolo")
 def match_video(video: UploadFile = File()) -> list[MatchingData]:
+    """
+    Получение предсказаний используя только модель поиска вставок поверх видео
+    """
     save_path = blob_directory + video.filename
 
     with open(save_path, "wb") as f:
@@ -129,6 +140,9 @@ def match_video(video: UploadFile = File()) -> list[MatchingData]:
 
 @router.post("/match_video_without_saving_raw")
 def raw_vectors(video: UploadFile = File()) -> list[ScoredPoint]:
+    """
+    Получить результаты векторного поиска без пост-процессинга для каждого кадра видео
+    """
     save_path = blob_directory + video.filename
 
     with open(save_path, "wb") as f:

@@ -17,9 +17,7 @@ from .routers import (plagiary_search,
                       async_plagiary_search, 
                       matching_jobs, media)
 
-app = FastAPI(title="vectorStoreAPI")
-
-# app.mount('/media/videos', StaticFiles(directory='./data/videos'), 'files')
+app = FastAPI(title="CopyRighteous")
 
 origins = ["*"]
 
@@ -30,7 +28,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 app.include_router(
     router=sync_ingestion.router,
@@ -53,7 +50,7 @@ app.include_router(
 app.include_router(
     router=media.router,
     prefix="/media",
-    tags=["Plagiary search"]
+    tags=["Media streaming"]
 )
 
 app.include_router(

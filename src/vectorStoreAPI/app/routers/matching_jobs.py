@@ -8,15 +8,24 @@ router = APIRouter()
 
 @router.get("/")
 def get_all_jobs() -> list[MatchingJobData]:
+    """
+    Получить список всех заданий мэтчинга
+    """
     return job_metadata_handler.get_all_jobs()
 
 @router.get("/active")
 def get_all_active_jobs() -> list[MatchingJobData]:
+    """
+    Получить только активные задания мэтчинга
+    """
     return job_metadata_handler.get_active_jobs()
     
 
 @router.get("/by_video/{video_id}")
-def get_all_jobs(video_id: str) -> list[MatchingJobData]:
+def get_all_jobs_by_video_id(video_id: str) -> list[MatchingJobData]: 
+    """
+    Получить все работы по идентификатору видео
+    """
     result = job_metadata_handler.get_job_metadata_by_video_id(video_id)
     if result:
         result = list(map(lambda x: MatchingJobData(**x), result))
@@ -25,7 +34,10 @@ def get_all_jobs(video_id: str) -> list[MatchingJobData]:
 
 
 @router.get("/{job_id}")
-def get_all_jobs(job_id: UUID) -> MatchingJobData:
+def get_specific(job_id: UUID) -> MatchingJobData:
+    """
+    Получить конкретное задание по идентификатору
+    """
     result = job_metadata_handler.get_job_metadata(job_id)
     if result:
         return result
