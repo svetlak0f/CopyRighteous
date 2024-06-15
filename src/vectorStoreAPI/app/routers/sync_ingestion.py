@@ -104,9 +104,6 @@ def match_video(video: UploadFile = File()) -> list[MatchingData]:
                                                 new_values=data)   
 
 
-    print(result)
-
-
     # except:
     #     raise HTTPException(422, "Wrong video format")
 
