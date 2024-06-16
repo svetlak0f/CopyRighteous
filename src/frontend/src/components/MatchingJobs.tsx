@@ -38,7 +38,6 @@ interface JobData {
 const JobsDataGrid: React.FC = () => {
   const [data, setData] = useState<JobData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [deleteVideoId, setDeleteVideoId] = useState('');
   const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
 
   const fetchData = async () => {
@@ -128,7 +127,7 @@ const JobsDataGrid: React.FC = () => {
         <DialogContent>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <CircularProgress size={20} style={{ marginRight: '10px' }} />
-            <span>Удаление {deleteVideoId}...</span>
+            <span>Удаление ...</span>
           </div>
         </DialogContent>
       </Dialog>

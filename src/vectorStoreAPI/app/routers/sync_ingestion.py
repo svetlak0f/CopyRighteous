@@ -14,7 +14,8 @@ from ..internal.metadata_handler import MetadataHandler, JobMetadataHandler
 from ..schemas.video import MatchingData, SpecifiedMatching
 from ..internal.yolo_vectorizer import YoloDetector
 from ..internal.seqfinder import process_matching_results
-# from ..internal.sound_matcher import compare_audio_of_video_fragments
+if os.environ.get("ENABLE_SOUND_MODEL"):
+    from ..internal.sound_matcher import compare_audio_of_video_fragments
 from qdrant_client.models import ScoredPoint
 from datetime import datetime
 
@@ -60,16 +61,16 @@ def upload_video(video: UploadFile = File(), search_while_ingestion: bool = Fals
     with open(save_path, "wb") as f:
         f.write(video.file.read())
 
-    # try:
-    video_processor.process_video(save_path, 
-                                    video_id=video_id, 
-                                    search_while_ingestion=search_while_ingestion)
-    # except ValueError:
-    #     raise HTTPException(422, "Error while processing, check media format")
-    # except RuntimeError as e:
-    #     raise HTTPException(500, f"Error while vector store uploading, details {e}")
-    # except TypeError:
-    #     raise HTTPException(422, f"Plagiary found for: {video_id}")
+    try:
+        video_processor.process_video(save_path, 
+                                        video_id=video_id, 
+                                        search_while_ingestion=search_while_ingestion)
+    except ValueError:
+        raise HTTPException(422, "Error while processing, check media format")
+    except RuntimeError as e:
+        raise HTTPException(500, f"Error while vector store uploading, details {e}")
+    except TypeError:
+        raise HTTPException(422, f"Plagiary found for: {video_id}")
 
     return {"message": "Video saved and indexed successfully"}
 
@@ -93,14 +94,14 @@ def match_video(video: UploadFile = File()) -> list[MatchingData]:
     results_yolo = video_processor.sync_process_with_yolo(video_path=save_path)
 
     results.extend(results_yolo)
-
-    # for result in results:
-    #     sound_similarity_score = compare_audio_of_video_fragments(save_path, 
-    #                                     f"./data/videos/{result.match_video_id}.mp4",
-    #                                     starttime1=result.match_start_frame // 10, endtime1=result.match_end_frame // 10,
-    #                                     starttime2=result.query_start_frame // 10, endtime2=result.query_end_frame // 10)
-        
-    #     result.sound_similarity_score = sound_similarity_score
+    if os.environ.get("ENABLE_SOUND_MODEL"):
+        for result in results:
+            sound_similarity_score = compare_audio_of_video_fragments(save_path, 
+                                            f"./data/videos/{result.match_video_id}.mp4",
+                                            starttime1=result.match_start_frame // 10, endtime1=result.match_end_frame // 10,
+                                            starttime2=result.query_start_frame // 10, endtime2=result.query_end_frame // 10)
+            
+            result.sound_similarity_score = sound_similarity_score
 
 
     data = {
@@ -121,7 +122,7 @@ def match_video(video: UploadFile = File()) -> list[MatchingData]:
 
 
 @router.post("/match_video_without_saving_yolo")
-def match_video(video: UploadFile = File()) -> list[MatchingData]:
+def match_video_yolo(video: UploadFile = File()) -> list[MatchingData]:
     """
     Получение предсказаний используя только модель поиска вставок поверх видео
     """

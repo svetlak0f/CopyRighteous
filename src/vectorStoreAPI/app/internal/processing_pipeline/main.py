@@ -8,6 +8,8 @@ from datetime import datetime
 
 from uuid import uuid4
 from ..seqfinder import process_matching_results
+if os.environ.get("ENABLE_SOUND_MODEL"):
+    from ..sound_matcher import compare_audio_of_video_fragments
 from ...schemas.video import MatchingData
 from qdrant_client.models import ScoredPoint
 
@@ -30,22 +32,22 @@ class ProcessingPipeline:
         self.yolo_vectorizer = yolo_vectorizer
 
     def process_video(self, video_path, video_id, search_while_ingestion: bool = False):
-        # try:
-        self.metadata_handler.add_new_video_metadata(video_id)
-        result, frames_count, video_time, framerate = self.video_vectorizer.process_video(video_path=video_path)
-        metadata = {
-            "frames_count": frames_count,
-            "video_time": str(video_time),
-            "framerate": framerate
-        }
-        self.metadata_handler.update_video_metadata(video_id=video_id, new_values=metadata)
-        # except:
-        #     os.remove(video_path)
-        #     metadata = {
-        #         "status": "Error",
-        #     }
-        #     self.metadata_handler.update_video_metadata(video_id=video_id, new_values=metadata)
-        #     raise ValueError("Error while processing, check media format")
+        try:
+            self.metadata_handler.add_new_video_metadata(video_id)
+            result, frames_count, video_time, framerate = self.video_vectorizer.process_video(video_path=video_path)
+            metadata = {
+                "frames_count": frames_count,
+                "video_time": str(video_time),
+                "framerate": framerate
+            }
+            self.metadata_handler.update_video_metadata(video_id=video_id, new_values=metadata)
+        except:
+            os.remove(video_path)
+            metadata = {
+                "status": "Error",
+            }
+            self.metadata_handler.update_video_metadata(video_id=video_id, new_values=metadata)
+            raise ValueError("Error while processing, check media format")
         
         if search_while_ingestion:
             job_id = uuid4()
@@ -57,6 +59,15 @@ class ProcessingPipeline:
             yolo_matching_data = self.sync_process_with_yolo(video_path)
 
             matching_data.extend(yolo_matching_data)
+
+            if os.environ.get("ENABLE_SOUND_MODEL"):
+                for result in matching_data:
+                    sound_similarity_score = compare_audio_of_video_fragments(video_path, 
+                                                    f"./data/videos/{result.match_video_id}.mp4",
+                                                    starttime1=result.match_start_frame // 10, endtime1=result.match_end_frame // 10,
+                                                    starttime2=result.query_start_frame // 10, endtime2=result.query_end_frame // 10)
+                    
+                    result.sound_similarity_score = sound_similarity_score
 
             data = {
                 "status": "Done",
@@ -126,7 +137,6 @@ class ProcessingPipeline:
 
     def run_video_matching(self, video_id):
         job_id = uuid4()
-        # try:
         self.job_metadata_handler.submit_matching_job(job_id=job_id,
                                                     video_id=video_id)
         vector_search_results = self.video_db_handler.search_nearest_by_video_id(video_id)
@@ -144,14 +154,6 @@ class ProcessingPipeline:
 
         self.job_metadata_handler.update_matching_job(job_id,
                                                     new_values=data)
-        # except:
-        #                 data = {
-        #         "status": "Done",
-        #         "finished_at": datetime.now(),
-        #         "results": list(map(lambda x: x.model_dump(), matching_data))
-        #     }
 
-        #     self.job_metadata_handler.update_matching_job(job_id,
-        #                                                 new_values=data)
         
 
