@@ -3,7 +3,7 @@ from datetime import timedelta
 from qdrant_client.models import ScoredPoint
 from typing import Optional
 
-from ...schemas.video import MatchingData
+from ...schemas.video import MatchingData, MatchingJobData
 
 
 def smooth_sequences(df, max_skip=1, min_length=2):
@@ -96,3 +96,20 @@ def process_matching_results(results: list[ScoredPoint], max_skip=12, min_length
 
     
 
+def generate_submission_dataframe(matching_data: MatchingData, id_piracy: str) -> pd.DataFrame:
+    data = {
+        "id_piracy": [id_piracy],
+        "segment1": [f"{matching_data.query_start_frame // 10}-{matching_data.query_end_frame // 10}"],
+        "id_licence": [matching_data.match_video_id],
+        "segment2": [f"{matching_data.match_start_frame // 10}-{matching_data.match_end_frame // 10}"]
+    }
+    df = pd.DataFrame(data)
+    return df
+
+
+def convert_matching_job_to_sumbission(matching_job: MatchingJobData) -> pd.DataFrame:
+    sumbmissions = list()
+    for result in matching_job.results:
+        sumbmissions.append(generate_submission_dataframe(result, id_piracy=matching_job.query_video_id))
+    
+    return pd.concat(sumbmissions, axis=0, ignore_index=True)

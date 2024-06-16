@@ -116,7 +116,7 @@ const VideoDataGrid: React.FC = () => {
 
   return (
     <div style={{ height: 800, width: '100%' }}>
-      <DataGrid rows={data} columns={columns}   initialState={{
+      <DataGrid rows={data} columns={columns} initialState={{
     sorting: {
       sortModel: [{ field: 'uploaded_at', sort: 'desc' }],
     },

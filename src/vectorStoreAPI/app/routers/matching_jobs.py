@@ -1,6 +1,10 @@
 from fastapi import Depends, HTTPException, status, APIRouter, Request, Response, Form, Body, Path, UploadFile, File
 from .sync_ingestion import job_metadata_handler
 from ..schemas.video import VideoMetadata, MatchingJobData
+from ..internal.seqfinder import convert_matching_job_to_sumbission
+from fastapi.responses import StreamingResponse 
+import pandas as pd
+
 import os
 from uuid import UUID
 
@@ -12,6 +16,22 @@ def get_all_jobs() -> list[MatchingJobData]:
     Получить список всех заданий мэтчинга
     """
     return job_metadata_handler.get_all_jobs()
+
+@router.get("/submission_file")
+def get_all_videos_sumbission_files():
+    """
+    Получить сабмишен файл для всех файлов
+    """
+    jobs = job_metadata_handler.get_all_jobs()
+    jobs = list(map(lambda x: MatchingJobData(**x), jobs))
+    jobs = list(filter(lambda x: x.status == "Done" and x.results, jobs))
+    sumbmissions = list(map(convert_matching_job_to_sumbission, jobs))
+    sumbmissions = pd.concat(sumbmissions, axis=0, ignore_index=True)
+    return StreamingResponse(
+        iter([sumbmissions.to_csv(index=False)]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=data.csv"}
+)
 
 @router.get("/active")
 def get_all_active_jobs() -> list[MatchingJobData]:

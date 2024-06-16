@@ -27,15 +27,6 @@ interface JobResults {
   similarity_score: number;
 }
 
-interface JobData {
-  job_id: string;
-  query_video_id: string;
-  status: string;
-  started_at: string;
-  finished_at: number;
-  results: JobResults[];
-}
-
 interface VideoPlayerProps {
   videoData: VideoData;
 }

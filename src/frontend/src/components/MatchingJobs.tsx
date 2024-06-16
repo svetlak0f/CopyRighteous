@@ -118,7 +118,11 @@ const JobsDataGrid: React.FC = () => {
   
   return (
     <div style={{ height: 800, width: '100%' }}>
-      <DataGrid rows={data} columns={columns} />
+      <DataGrid rows={data} columns={columns} initialState={{
+    sorting: {
+      sortModel: [{ field: 'started_at', sort: 'desc' }],
+    },
+  }} />
 
       <Dialog open={isDeleteConfirmationOpen} onClose={() => setIsDeleteConfirmationOpen(false)}>
         <DialogContent>
