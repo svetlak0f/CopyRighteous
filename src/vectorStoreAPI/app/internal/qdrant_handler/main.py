@@ -11,13 +11,14 @@ from typing import Optional
 from qdrant_client.http.exceptions import UnexpectedResponse
 from grpc._channel import _InactiveRpcError
 import logging
+import os
 
 
 
 class VectorHandler:
     
     def __init__(self, 
-                 database_address="http://localhost", 
+                 database_address=os.environ["QDRANT_ADDRESS"], 
                  vector_length=1000,
                  collection_name="embeddings_video"):
         
@@ -56,7 +57,7 @@ class VectorHandler:
         search_queries = list(map(lambda x: models.SearchRequest(vector=x, filter=search_filter, limit=1, with_payload=True), vectors))
         search_chunks = list(self.divide_chunks(search_queries, chunk_size))
         results = list()
-        for chunk in tqdm(search_chunks):
+        for chunk in tqdm(search_chunks, desc='Vector search'):
             data = self.client.search_batch(collection_name=self.collection_name, requests=chunk)
             data = list(map(lambda x: x[0], data))
             results.extend(data)

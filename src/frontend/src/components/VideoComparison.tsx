@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Grid } from '@mui/material';
+import { Box, Typography, Grid, Paper } from '@mui/material';
 import { getSpecificMatchingJobByJobID } from 'api/jobs';
 import { useSearchParams } from "react-router-dom";
 import ReactPlayer from 'react-player';
+import { Divider } from "@mui/material";
 
 interface VideoData {
   startFrame: number;
@@ -41,14 +42,14 @@ interface VideoPlayerProps {
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoData }) => {
   return (
-    <>
+    <Box sx={{ padding: 2 }}>
       <ReactPlayer
         controls
         url={`http://127.0.0.1:8000/media/videos/${videoData.videoUrl}`}
       />
       <Typography>{`Время начала: ${videoData.startTime}`}</Typography>
       <Typography>{`Время конца: ${videoData.endTime}`}</Typography>
-    </>
+    </Box>
   );
 };
 
@@ -93,21 +94,28 @@ const VideoComparison: React.FC = () => {
   }, []);
 
   return (
-    <Box>
-      <Typography variant="h4">Мэтчинг для видео {searchVideoID}</Typography>
+    <Box sx={{ padding: 4 }}>
+      <Typography variant="h4" sx={{ marginBottom: 3 }}>Мэтчинг для видео {searchVideoID}</Typography>
       {videoData.query.length && videoData.match.length ? (
         videoData.query.map((queryVideo, index) => (
-          <Grid container spacing={2} key={index} alignItems="flex-start">
+          <>
+          <Grid container spacing={4} key={index} alignItems="flex-start" sx={{ marginBottom: 5, marginTop: 1 }}>
             <Grid item xs={6}>
-              <Typography variant="h5">Видео из запроса</Typography>
-              <VideoPlayer videoData={queryVideo} />
+              <Paper elevation={5} sx={{ padding: 3, height:550 }}>
+                <Typography variant="h5" sx={{ marginBottom: 2 }}>Видео из запроса</Typography>
+                <VideoPlayer videoData={queryVideo} />
+              </Paper>
             </Grid>
             <Grid item xs={6}>
-              <Typography variant="h5">Найденное видео: {queryVideo.videoUrl}</Typography>
-              <VideoPlayer videoData={videoData.match[index]} />
-              <Typography variant="h6">Скор похожести {queryVideo.confidence_score}</Typography>
+              <Paper elevation={5} sx={{ padding: 3, height:550 }}>
+                <Typography variant="h5" sx={{ marginBottom: 2 }}>Найденное видео: {videoData.match[index].videoUrl}</Typography>
+                <VideoPlayer videoData={videoData.match[index]} />
+                <Typography variant="h6" sx={{ marginTop: 2 }}>Скор похожести: {queryVideo.confidence_score}</Typography>
+              </Paper>
             </Grid>
           </Grid>
+          <Divider sx={{ borderBottomWidth: '5px'}}/>
+          </>
         ))
       ) : (
         <Typography>Загрузка...</Typography>
@@ -116,4 +124,4 @@ const VideoComparison: React.FC = () => {
   );
 };
 
-export default VideoComparison;
+export default VideoComparison

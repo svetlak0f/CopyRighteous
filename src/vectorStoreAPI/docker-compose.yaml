@@ -1,20 +1,27 @@
 services:
 
-  vectorStoreAPI:
+  copyrighteous:
     build:
-    context: .
-    dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile
     environment:
       DEVICE: cpu
+      MONGO_ADDRESS: mongo:27017/
+      QDRANT_ADDRESS: http://qdrant
+    restart: always
+    ports:
+      - 8000:8000
     volumes:
       - ./data/videos:/data/videos
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+      - ./data/cache:/root/.cache
+      - ./models:/models
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
 
   mongo:
     image: mongo:8.0.0-rc7-jammy

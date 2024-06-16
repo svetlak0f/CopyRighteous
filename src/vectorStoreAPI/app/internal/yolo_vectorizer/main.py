@@ -32,7 +32,7 @@ class YoloDetector:
         frames_batch = []
         write_segment = False
 
-        for frame_num in tqdm(range(1, total_frames + 1)):
+        for frame_num in tqdm(range(1, total_frames + 1), desc='Detection part'):
 
             ret, frame = cap.read()
             frames_batch.append(frame)

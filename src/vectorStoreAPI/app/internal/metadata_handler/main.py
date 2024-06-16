@@ -5,8 +5,6 @@ from ...schemas.video import VideoMetadata, MatchingJobData
 from uuid import UUID
 
 # database_path = os.environ["DATABASE_ADDRESS"]
-database_path = "127.0.0.1:27017/"
-database_name = "metadata"
 
 # client = MongoClient(f"mongodb://root:example@{database_path}", uuidRepresentation='standard')
 # db = client[database_name]
@@ -15,7 +13,7 @@ database_name = "metadata"
 
 class MetadataHandler:
 
-    def __init__(self, database_path="127.0.0.1:27017/", database_name="metadata"):
+    def __init__(self, database_path=os.environ["MONGO_ADDRESS"], database_name="metadata"):
         self.client = MongoClient(f"mongodb://root:example@{database_path}", uuidRepresentation='standard')
         self.db = self.client[database_name]
         self.db.videos.create_index("video_id", unique=True, partialFilterExpression={"domain_name": {"$exists": True}})
@@ -57,7 +55,7 @@ class MetadataHandler:
 
 
 class JobMetadataHandler:
-    def __init__(self, database_path="127.0.0.1:27017/", database_name="metadata"):
+    def __init__(self, database_path=os.environ["MONGO_ADDRESS"], database_name="metadata"):
         self.client = MongoClient(f"mongodb://root:example@{database_path}", uuidRepresentation='standard')
         self.db = self.client[database_name]
         self.db.indexing_jobs.create_index("job_id", unique=True, partialFilterExpression={"domain_name": {"$exists": True}})

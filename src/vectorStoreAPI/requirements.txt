@@ -5,7 +5,7 @@ requests==2.27.1
 python-multipart==0.0.6
 python-dotenv
 
-numpy==1.26.4
+numpy==1.24.3
 torch==2.3.1
 qdrant-client==1.9.1
 python-magic==0.4.27
@@ -16,3 +16,5 @@ tqdm==4.66.4
 pymongo==4.7.3
 pandas==2.2.2
 moviepy==1.0.3
+transformers==4.41.2
+ultralytics==8.2.31

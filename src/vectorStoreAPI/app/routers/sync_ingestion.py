@@ -14,21 +14,23 @@ from ..internal.metadata_handler import MetadataHandler, JobMetadataHandler
 from ..schemas.video import MatchingData, SpecifiedMatching
 from ..internal.yolo_vectorizer import YoloDetector
 from ..internal.seqfinder import process_matching_results
-from ..internal.sound_matcher import compare_audio_of_video_fragments
+# from ..internal.sound_matcher import compare_audio_of_video_fragments
 from qdrant_client.models import ScoredPoint
 from datetime import datetime
 
 
 blob_directory = "./data/videos/"
 
+DEVICE = os.environ["DEVICE"]
+
 # video_vectorizer = ClipVectorizer(device="mps")
-video_vectorizer = ResnetVectorizer(device="mps")
+video_vectorizer = ResnetVectorizer(device=DEVICE)
 video_db_handler = VectorHandler()
 metadata_handler = MetadataHandler()
 job_metadata_handler = JobMetadataHandler()
 
 yolo_vectorizer = YoloDetector(video_vectorizer=video_vectorizer,
-                               device="mps")
+                               device=DEVICE)
 
 video_processor = ProcessingPipeline(video_vectorizer=video_vectorizer, 
                                      video_db_handler=video_db_handler,
