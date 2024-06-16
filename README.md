@@ -25,7 +25,7 @@ npm start
 #### Для локальной разработки:
 ```bash
 docker compose up qdrant mongo
-chmod +x run_backend
+chmod +x run_backend.sh
 ./run_backend.sh
 ```
 
