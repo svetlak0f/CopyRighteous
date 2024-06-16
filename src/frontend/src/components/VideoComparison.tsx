@@ -4,6 +4,7 @@ import { getSpecificMatchingJobByJobID } from 'api/jobs';
 import { useSearchParams } from "react-router-dom";
 import ReactPlayer from 'react-player';
 import { Divider } from "@mui/material";
+import { apiAddress } from 'constants/apiAddress';
 
 interface VideoData {
   startFrame: number;
@@ -36,7 +37,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoData }) => {
     <Box sx={{ padding: 2 }}>
       <ReactPlayer
         controls
-        url={`http://127.0.0.1:8000/media/videos/${videoData.videoUrl}`}
+        url={`${apiAddress}/media/videos/${videoData.videoUrl}`}
       />
       <Typography>{`Время начала: ${videoData.startTime}`}</Typography>
       <Typography>{`Время конца: ${videoData.endTime}`}</Typography>
