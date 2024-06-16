@@ -39,3 +39,20 @@ async def upload_video(background_tasks: BackgroundTasks, video: UploadFile = Fi
                               search_while_ingestion=search_while_ingestion)
 
     return {"message": f"Video saved and indexing process has been started. Video_id: {video_id}"}
+
+
+@router.post("/match_video_without_saving")
+def match_video(background_tasks: BackgroundTasks, video: UploadFile = File()):
+    """
+    Асинхронный эндпоинт для проверки видео на плагиат без его загрузки в базу
+    """
+    save_path = blob_directory + video.filename
+
+    with open(save_path, "wb") as f:
+        f.write(video.file.read())
+
+
+    background_tasks.add_task(video_processor.run_video_matching_by_path, 
+                              video_path=save_path)
+    
+    return "Matching job started"

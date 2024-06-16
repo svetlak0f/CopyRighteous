@@ -135,6 +135,33 @@ class ProcessingPipeline:
         
         return results
 
+
+    def run_video_matching_by_path(self, video_path):
+        job_id = uuid4()
+        self.job_metadata_handler.submit_matching_job(job_id=job_id,
+                                                video_id=Path(video_path).stem)
+
+        results = self.sync_video_processing(video_path=video_path)
+        results_yolo = self.sync_process_with_yolo(video_path=video_path)
+        results.extend(results_yolo)
+        if os.environ.get("ENABLE_SOUND_MODEL"):
+            for result in results:
+                sound_similarity_score = compare_audio_of_video_fragments(video_path, 
+                                                f"./data/videos/{result.match_video_id}.mp4",
+                                                starttime1=result.match_start_frame // 10, endtime1=result.match_end_frame // 10,
+                                                starttime2=result.query_start_frame // 10, endtime2=result.query_end_frame // 10)
+                
+                result.sound_similarity_score = sound_similarity_score 
+        data = {
+            "status": "Done",
+            "finished_at": datetime.now(),
+            "results": list(map(lambda x: x.model_dump(), results))
+        }
+
+
+        self.job_metadata_handler.update_matching_job(job_id,
+                                                    new_values=data)          
+
     def run_video_matching(self, video_id):
         job_id = uuid4()
         self.job_metadata_handler.submit_matching_job(job_id=job_id,
