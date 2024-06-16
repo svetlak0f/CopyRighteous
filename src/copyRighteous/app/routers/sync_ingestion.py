@@ -84,39 +84,39 @@ def match_video(video: UploadFile = File()) -> list[MatchingData]:
     with open(save_path, "wb") as f:
         f.write(video.file.read())
 
-    # try:
+    try:
 
-    job_id = uuid4()
-    job_metadata_handler.submit_matching_job(job_id=job_id,
-                                            video_id=Path(video.filename).stem)
+        job_id = uuid4()
+        job_metadata_handler.submit_matching_job(job_id=job_id,
+                                                video_id=Path(video.filename).stem)
 
-    results = video_processor.sync_video_processing(video_path=save_path)
-    results_yolo = video_processor.sync_process_with_yolo(video_path=save_path)
+        results = video_processor.sync_video_processing(video_path=save_path)
+        results_yolo = video_processor.sync_process_with_yolo(video_path=save_path)
 
-    results.extend(results_yolo)
-    if os.environ.get("ENABLE_SOUND_MODEL"):
-        for result in results:
-            sound_similarity_score = compare_audio_of_video_fragments(save_path, 
-                                            f"./data/videos/{result.match_video_id}.mp4",
-                                            starttime1=result.match_start_frame // 10, endtime1=result.match_end_frame // 10,
-                                            starttime2=result.query_start_frame // 10, endtime2=result.query_end_frame // 10)
-            
-            result.sound_similarity_score = sound_similarity_score
-
-
-    data = {
-        "status": "Done",
-        "finished_at": datetime.now(),
-        "results": list(map(lambda x: x.model_dump(), results))
-    }
+        results.extend(results_yolo)
+        if os.environ.get("ENABLE_SOUND_MODEL"):
+            for result in results:
+                sound_similarity_score = compare_audio_of_video_fragments(save_path, 
+                                                f"./data/videos/{result.match_video_id}.mp4",
+                                                starttime1=result.match_start_frame // 10, endtime1=result.match_end_frame // 10,
+                                                starttime2=result.query_start_frame // 10, endtime2=result.query_end_frame // 10)
+                
+                result.sound_similarity_score = sound_similarity_score
 
 
-    job_metadata_handler.update_matching_job(job_id,
-                                                new_values=data)   
+        data = {
+            "status": "Done",
+            "finished_at": datetime.now(),
+            "results": list(map(lambda x: x.model_dump(), results))
+        }
 
 
-    # except:
-    #     raise HTTPException(422, "Wrong video format")
+        job_metadata_handler.update_matching_job(job_id,
+                                                    new_values=data)   
+
+
+    except:
+        raise HTTPException(422, "Wrong video format")
 
     return results
 
@@ -131,12 +131,12 @@ def match_video_yolo(video: UploadFile = File()) -> list[MatchingData]:
     with open(save_path, "wb") as f:
         f.write(video.file.read())
 
-    # try:
-    results = video_processor.sync_process_with_yolo(video_path=save_path)
-    # except:
-    #     raise HTTPException(422, "Wrong video format")
-    # finally:
-    #     os.remove(save_path)
+    try:
+        results = video_processor.sync_process_with_yolo(video_path=save_path)
+    except:
+        raise HTTPException(422, "Wrong video format")
+    finally:
+        os.remove(save_path)
 
     return results
 
